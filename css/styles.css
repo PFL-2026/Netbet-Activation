@@ -4664,6 +4664,42 @@ body.terms-modal-open { overflow: hidden; }
 }
 
 
+/* === Commercials modal header lockup (PFL × NetBet) === */
+.terms-modal-lockup {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    padding-right: 20px;
+    margin-right: 4px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.terms-modal-lockup img {
+    width: auto;
+    display: block;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+}
+/* Matches the topbar's optical balance: the PFL mark carries a crown, so it
+   needs marginally more height than the NetBet wordmark to read level. */
+.terms-modal-lockup img:first-of-type { height: 30px; }
+.terms-modal-lockup img:last-of-type { height: 29px; }
+.terms-modal-lockup-x {
+    width: 1px;
+    height: 22px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.28) 30%, rgba(255,255,255,0.28) 70%, transparent 100%);
+}
+@media (max-width: 900px) {
+    .terms-modal-lockup {
+        display: none;
+    }
+}
+/* The lockup is decorative on screen; the print header carries it on paper. */
+@media print {
+    .terms-modal-lockup { display: none; }
+}
+
 /* Height shares for the stacked social-series pair (see .ig-series-pair). */
 .ig-series-pair img:nth-of-type(1) { max-height: calc((100% - 16px) * 0.438); }
 .ig-series-pair img:nth-of-type(2) { max-height: calc((100% - 16px) * 0.562); }
