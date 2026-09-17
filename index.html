@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=97dd281edb1c">
+<link rel="stylesheet" href="css/styles.css?v=1ca3b155298f">
 </head>
 <body>
 
@@ -1053,6 +1053,252 @@
 </div>
 <!-- COMMERCIALS_MODAL_END -->
 
-<script src="js/deck.js?v=97dd281edb1c"></script>
+<script src="js/deck.js?v=1ca3b155298f"></script>
+<style id="editToolsStyles">
+/* === Commercials modal edit tools (only with ?edit in the URL) ===
+   Hidden by default so the partner-facing deck is visually unchanged. */
+.terms-modal-edit {
+    display: none;
+}
+body.terms-edit-available .terms-modal-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+    font-family: var(--font-cond);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+/* The two extra buttons leave no room for the lockup, so it steps aside in
+   edit mode. Edit mode is a working view; the partner-facing one keeps it. */
+body.terms-edit-available .terms-modal-lockup {
+    display: none;
+}
+body.terms-edit-available .terms-modal-edit:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+}
+body.terms-edit-available .terms-modal-edit.is-active {
+    background: var(--ls-green);
+    border-color: var(--ls-green);
+    color: #fff;
+}
+/* Editing affordance: a dashed frame inside the body, plus a soft tint on the
+   block under the caret. Deliberately subtle so line breaks don't shift. */
+.terms-modal.is-editing .terms-modal-body {
+    outline: 1px dashed rgba(255, 255, 255, 0.18);
+    outline-offset: -8px;
+}
+.terms-modal.is-editing .terms-modal-body:focus {
+    outline-color: var(--ls-green-bright);
+}
+.terms-modal.is-editing .terms-modal-body li:hover,
+.terms-modal.is-editing .terms-modal-body dd:hover {
+    background: rgba(255, 255, 255, 0.035);
+    border-radius: 3px;
+}
+/* Confirmation toast when the edit tools are switched on or off. */
+.edit-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translate(-50%, 16px);
+    z-index: 9999;
+    max-width: min(520px, 90vw);
+    padding: 13px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(18, 20, 28, 0.96);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-body);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.edit-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+@media print {
+    .terms-modal-edit { display: none !important; }
+    .terms-modal.is-editing .terms-modal-body { outline: none; }
+    .edit-toast { display: none !important; }
+}
+</style>
+
+<script id="editToolsScript">
+/* ===================================================================
+   Commercials modal — in-place editing (opt-in)
+   -------------------------------------------------------------------
+   Edit tools appear ONLY when the deck is opened with "?edit" in the
+   URL, so the partner-facing link is untouched. Edits live in the
+   browser and are NOT saved anywhere: "Export" writes an updated
+   index.html for committing to GitHub. Reloading without exporting
+   discards changes.
+   =================================================================== */
+(function setupCommercialsEditing() {
+  const modal = document.getElementById('commercialsModal');
+  if (!modal) return;
+  const body = modal.querySelector('.terms-modal-body');
+  const editBtn = modal.querySelector('[data-terms-edit]');
+  const exportBtn = modal.querySelector('[data-terms-export]');
+  if (!body || !editBtn || !exportBtn) return;
+
+  /* Activation, in order of convenience:
+       - "?edit" or "#edit" in the URL
+       - Ctrl/Cmd + Shift + E at any time
+       - remembered in localStorage once turned on, so it survives reloads
+         and plain visits to the site on this browser only
+     Nothing here ever reaches another viewer's machine. */
+  const STORE_KEY = 'pfl-netbet-edit-tools';
+
+  function remembered() {
+    try { return window.localStorage.getItem(STORE_KEY) === '1'; }
+    catch (err) { return false; }
+  }
+  function remember(on) {
+    try {
+      if (on) window.localStorage.setItem(STORE_KEY, '1');
+      else window.localStorage.removeItem(STORE_KEY);
+    } catch (err) { /* private browsing — session only */ }
+  }
+
+  function toast(msg) {
+    let el = document.getElementById('editToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'editToast';
+      el.className = 'edit-toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('is-visible');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('is-visible'), 2600);
+  }
+
+  function setAvailable(on, announce) {
+    document.body.classList.toggle('terms-edit-available', on);
+    remember(on);
+    if (!on) setEditing(false);
+    if (announce) {
+      toast(on
+        ? 'Edit tools on — open Commercials, then click Edit. Ctrl/Cmd+Shift+E to hide.'
+        : 'Edit tools off.');
+    }
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const urlAsked = params.has('edit') || window.location.hash.toLowerCase() === '#edit';
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setAvailable(!document.body.classList.contains('terms-edit-available'), true);
+    }
+  }, true);
+
+  if (urlAsked) setAvailable(true, true);
+  else if (remembered()) setAvailable(true, false);
+
+  const START = '<!-- COMMERCIALS_MODAL_START -->';
+  const END = '<!-- COMMERCIALS_MODAL_END -->';
+  let editing = false;
+  let dirty = false;
+
+  // Hoisted function declaration: setAvailable() above calls this.
+  function setEditing(on) {
+    editing = on;
+    body.setAttribute('contenteditable', on ? 'true' : 'false');
+    body.spellcheck = on;
+    modal.classList.toggle('is-editing', on);
+    editBtn.classList.toggle('is-active', on);
+    editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    editBtn.querySelector('span').textContent = on ? 'Editing' : 'Edit';
+    if (on) body.focus();
+  }
+  setEditing(false);
+
+  editBtn.addEventListener('click', () => setEditing(!editing));
+  body.addEventListener('input', () => { dirty = true; });
+
+  // Keep pasted text plain so pasting from Word/Docs can't drag in foreign
+  // fonts, colours or spans and break the deck's formatting.
+  body.addEventListener('paste', (e) => {
+    if (!editing) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, text);
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  function cleanedModalHTML() {
+    const clone = modal.cloneNode(true);
+    clone.classList.remove('is-open', 'is-editing');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('[contenteditable]').forEach(el => {
+      el.removeAttribute('contenteditable');
+      el.removeAttribute('spellcheck');
+    });
+    const eb = clone.querySelector('[data-terms-edit]');
+    if (eb) {
+      eb.classList.remove('is-active');
+      eb.setAttribute('aria-pressed', 'false');
+      const s = eb.querySelector('span');
+      if (s) s.textContent = 'Edit';
+    }
+    return clone.outerHTML;
+  }
+
+  function download(name, text) {
+    const blob = new Blob([text], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  exportBtn.addEventListener('click', async () => {
+    const fresh = cleanedModalHTML();
+    try {
+      const res = await fetch(window.location.pathname, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const src = await res.text();
+      const i = src.indexOf(START);
+      const j = src.indexOf(END);
+      if (i === -1 || j === -1) throw new Error('markers missing');
+      download('index.html',
+        src.slice(0, i + START.length) + '\n' + fresh + '\n' + src.slice(j));
+      dirty = false;
+    } catch (err) {
+      // Opening the file directly from disk blocks reading the page source,
+      // so hand back just the modal block to paste between the two markers.
+      download('commercials-modal.html', START + '\n' + fresh + '\n' + END);
+      dirty = false;
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
