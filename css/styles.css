@@ -4714,9 +4714,36 @@ body.terms-edit-available .terms-modal-edit.is-active {
     background: rgba(255, 255, 255, 0.035);
     border-radius: 3px;
 }
+/* Confirmation toast when the edit tools are switched on or off. */
+.edit-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translate(-50%, 16px);
+    z-index: 9999;
+    max-width: min(520px, 90vw);
+    padding: 13px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(18, 20, 28, 0.96);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-body);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.edit-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
 @media print {
     .terms-modal-edit { display: none !important; }
     .terms-modal.is-editing .terms-modal-body { outline: none; }
+    .edit-toast { display: none !important; }
 }
 
 /* === Commercials modal header lockup (PFL × NetBet) === */

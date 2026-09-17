@@ -1137,9 +1137,36 @@ body.terms-edit-available .terms-modal-edit.is-active {
     background: rgba(255, 255, 255, 0.035);
     border-radius: 3px;
 }
+/* Confirmation toast when the edit tools are switched on or off. */
+.edit-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translate(-50%, 16px);
+    z-index: 9999;
+    max-width: min(520px, 90vw);
+    padding: 13px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(18, 20, 28, 0.96);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-body);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.edit-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
 @media print {
     .terms-modal-edit { display: none !important; }
     .terms-modal.is-editing .terms-modal-body { outline: none; }
+    .edit-toast { display: none !important; }
 }
 
 /* === Commercials modal header lockup (PFL × NetBet) === */
@@ -1242,14 +1269,70 @@ EDIT_JS = r"""
   const exportBtn = modal.querySelector('[data-terms-export]');
   if (!body || !editBtn || !exportBtn) return;
 
-  if (!new URLSearchParams(window.location.search).has('edit')) return;
-  document.body.classList.add('terms-edit-available');
+  /* Activation, in order of convenience:
+       - "?edit" or "#edit" in the URL
+       - Ctrl/Cmd + Shift + E at any time
+       - remembered in localStorage once turned on, so it survives reloads
+         and plain visits to the site on this browser only
+     Nothing here ever reaches another viewer's machine. */
+  const STORE_KEY = 'pfl-netbet-edit-tools';
+
+  function remembered() {
+    try { return window.localStorage.getItem(STORE_KEY) === '1'; }
+    catch (err) { return false; }
+  }
+  function remember(on) {
+    try {
+      if (on) window.localStorage.setItem(STORE_KEY, '1');
+      else window.localStorage.removeItem(STORE_KEY);
+    } catch (err) { /* private browsing — session only */ }
+  }
+
+  function toast(msg) {
+    let el = document.getElementById('editToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'editToast';
+      el.className = 'edit-toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('is-visible');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('is-visible'), 2600);
+  }
+
+  function setAvailable(on, announce) {
+    document.body.classList.toggle('terms-edit-available', on);
+    remember(on);
+    if (!on) setEditing(false);
+    if (announce) {
+      toast(on
+        ? 'Edit tools on — open Commercials, then click Edit. Ctrl/Cmd+Shift+E to hide.'
+        : 'Edit tools off.');
+    }
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const urlAsked = params.has('edit') || window.location.hash.toLowerCase() === '#edit';
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setAvailable(!document.body.classList.contains('terms-edit-available'), true);
+    }
+  }, true);
+
+  if (urlAsked) setAvailable(true, true);
+  else if (remembered()) setAvailable(true, false);
 
   const START = '<!-- COMMERCIALS_MODAL_START -->';
   const END = '<!-- COMMERCIALS_MODAL_END -->';
   let editing = false;
   let dirty = false;
 
+  // Hoisted function declaration: setAvailable() above calls this.
   function setEditing(on) {
     editing = on;
     body.setAttribute('contenteditable', on ? 'true' : 'false');

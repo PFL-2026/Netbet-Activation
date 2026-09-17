@@ -691,14 +691,70 @@
   const exportBtn = modal.querySelector('[data-terms-export]');
   if (!body || !editBtn || !exportBtn) return;
 
-  if (!new URLSearchParams(window.location.search).has('edit')) return;
-  document.body.classList.add('terms-edit-available');
+  /* Activation, in order of convenience:
+       - "?edit" or "#edit" in the URL
+       - Ctrl/Cmd + Shift + E at any time
+       - remembered in localStorage once turned on, so it survives reloads
+         and plain visits to the site on this browser only
+     Nothing here ever reaches another viewer's machine. */
+  const STORE_KEY = 'pfl-netbet-edit-tools';
+
+  function remembered() {
+    try { return window.localStorage.getItem(STORE_KEY) === '1'; }
+    catch (err) { return false; }
+  }
+  function remember(on) {
+    try {
+      if (on) window.localStorage.setItem(STORE_KEY, '1');
+      else window.localStorage.removeItem(STORE_KEY);
+    } catch (err) { /* private browsing — session only */ }
+  }
+
+  function toast(msg) {
+    let el = document.getElementById('editToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'editToast';
+      el.className = 'edit-toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('is-visible');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('is-visible'), 2600);
+  }
+
+  function setAvailable(on, announce) {
+    document.body.classList.toggle('terms-edit-available', on);
+    remember(on);
+    if (!on) setEditing(false);
+    if (announce) {
+      toast(on
+        ? 'Edit tools on — open Commercials, then click Edit. Ctrl/Cmd+Shift+E to hide.'
+        : 'Edit tools off.');
+    }
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const urlAsked = params.has('edit') || window.location.hash.toLowerCase() === '#edit';
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      setAvailable(!document.body.classList.contains('terms-edit-available'), true);
+    }
+  }, true);
+
+  if (urlAsked) setAvailable(true, true);
+  else if (remembered()) setAvailable(true, false);
 
   const START = '<!-- COMMERCIALS_MODAL_START -->';
   const END = '<!-- COMMERCIALS_MODAL_END -->';
   let editing = false;
   let dirty = false;
 
+  // Hoisted function declaration: setAvailable() above calls this.
   function setEditing(on) {
     editing = on;
     body.setAttribute('contenteditable', on ? 'true' : 'false');
