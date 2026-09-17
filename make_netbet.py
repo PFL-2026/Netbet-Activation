@@ -23,7 +23,11 @@ SRC = ROOT / "polymarket"          # pristine checkout
 NB = ROOT / "netbet_assets"        # supplied NetBet assets
 OUT = ROOT / "netbet"              # build target
 
-CACHE_BUST = "20260818-netbet1"
+# Placeholder only. The real value is a content hash of the finished CSS + JS,
+# stamped by stamp_cache_bust() after those files are written, so the query
+# string changes automatically whenever either file changes. A fixed string
+# here would let browsers and the GitHub Pages CDN keep serving stale assets.
+CACHE_BUST = "pending"
 
 # NetBet brand palette, sampled from the supplied logo
 NB_RED = "#c62026"
@@ -1401,6 +1405,26 @@ def audit():
 
 # ---------------------------------------------------------------------------
 
+def stamp_cache_bust():
+    """Rewrite the ?v= query strings using a hash of the built CSS and JS."""
+    import hashlib
+
+    css = (OUT / "css" / "styles.css").read_bytes()
+    js = (OUT / "js" / "deck.js").read_bytes()
+    digest = hashlib.sha256(css + js).hexdigest()[:12]
+
+    p = OUT / "index.html"
+    h = p.read_text()
+    h = sub1(h, r'css/styles\.css\?v=[^"]+', f'css/styles.css?v={digest}',
+             "css cache-bust stamped")
+    h = sub1(h, r'js/deck\.js\?v=[^"]+', f'js/deck.js?v={digest}',
+             "js cache-bust stamped")
+    p.write_text(h)
+    check("?v=pending" not in h, "no placeholder cache-bust left in index.html")
+    print(f"  cache-bust stamped: v={digest}")
+    return digest
+
+
 def main():
     print("Building PFL x NetBet deck\n")
     prepare_source()
@@ -1412,6 +1436,7 @@ def main():
     build_html()
     build_css()
     build_js()
+    stamp_cache_bust()
     orphans = audit()
 
     print(f"\n{CHECKS} verification checks run")
