@@ -505,15 +505,29 @@ BCAST_MODAL_NEW = """      <!-- Headline metrics row — 2026 France & UK viewer
 
 COMMERCIALS_MODAL = """
 <!-- Commercials Modal — opens from the top nav. Source: NetBet_Terms_Sheet_26-27.pptx -->
+<!-- COMMERCIALS_MODAL_START -->
 <div class="dist-modal terms-modal" id="commercialsModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="commercialsTitle">
   <div class="terms-modal-backdrop" data-close-dist-modal></div>
   <div class="terms-modal-shell">
     <header class="terms-modal-header">
+      <div class="terms-modal-lockup" aria-label="PFL and NetBet">
+        <img src="assets/images/pfl_logo.png" alt="PFL">
+        <span class="terms-modal-lockup-x" aria-hidden="true"></span>
+        <img src="assets/logos/netbet.png" alt="NetBet">
+      </div>
       <div class="terms-modal-titles">
         <div class="terms-modal-eyebrow">Heads of Terms · Confidential</div>
         <h2 id="commercialsTitle" class="terms-modal-title">Commercial <span class="ls-accent">Terms</span></h2>
       </div>
       <div class="terms-modal-actions">
+        <button type="button" class="terms-modal-edit" data-terms-edit aria-label="Toggle editing" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <span>Edit</span>
+        </button>
+        <button type="button" class="terms-modal-edit" data-terms-export aria-label="Export updated HTML">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h10l6 6v10a0 0 0 0 1 0 0H4Z"/><path d="M14 4v6h6M9 14h6M9 17h6"/></svg>
+          <span>Export</span>
+        </button>
         <button type="button" class="terms-modal-print" data-print-dist aria-label="Download as PDF">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           <span>Download PDF</span>
@@ -556,9 +570,9 @@ COMMERCIALS_MODAL = """
           <dt>Financial Commitment</dt>
           <dd>
             <ul>
-              <li><strong>2026:</strong> &euro;150,000</li>
-              <li><strong>2027:</strong> &euro;350,000</li>
-              <li>Virtual overlay branding at out-of-Territory events: &euro;20,000 per event, per market</li>
+              <li><strong>2026:</strong> &euro;125,000</li>
+              <li><strong>2027:</strong> &euro;250,000</li>
+              <li>Virtual overlay branding at out-of-Territory events: &euro;35,000 per event, per market</li>
               <li>Athlete ambassadors: costed as an additional line item (see <em>Athlete Ambassador Program</em>, asset 10)</li>
             </ul>
           </dd>
@@ -610,7 +624,9 @@ COMMERCIALS_MODAL = """
             <ul>
               <li>1 &times; large canvas</li>
               <li>1 &times; vertical bumper</li>
+              <li>1 &times; horizontal bumper</li>
               <li>One (1) additional full apron placement on cage</li>
+              <li>1 &times; concourse activation space</li>
             </ul>
           </div>
         </div>
@@ -618,7 +634,7 @@ COMMERCIALS_MODAL = """
         <div class="terms-asset">
           <div class="terms-asset-num">04</div>
           <div class="terms-asset-body">
-            <h4>In-Territory Events <span class="terms-asset-sub">presented by NetBet</span></h4>
+            <h4>Presenting Partner <span class="terms-asset-sub">of In-Territory Events</span></h4>
             <ul>
               <li>NetBet to be awarded <strong>Presenting Partner status</strong> of each Event in the Territory across 2026 and 2027</li>
               <li><strong>Event marketing &amp; promotion:</strong> NetBet featured and tagged (where appropriate) as presenting partner across all pre-event marketing and promotion &mdash; e.g. &lsquo;PFL Lyon presented by NetBet&rsquo;</li>
@@ -648,11 +664,12 @@ COMMERCIALS_MODAL = """
         <div class="terms-asset">
           <div class="terms-asset-num">06</div>
           <div class="terms-asset-body">
-            <h4>Virtual Overlay Branding</h4>
+            <h4>Virtual Overlay Branding <span class="terms-asset-sub">optional add-on &middot; out-of-Territory events</span></h4>
             <ul>
+              <li><strong>Optional additional asset</strong>, available at Events hosted outside the Territory and taken up at NetBet&rsquo;s election</li>
               <li>Virtual logo placement at out-of-Territory events on one (1) large canvas, one (1) vertical bumper and one (1) inner middle canvas position</li>
               <li><strong>NetBet will be the exclusive betting operator featured on the canvas</strong></li>
-              <li>Charged at &euro;20,000 per event, per market</li>
+              <li>Charged at &euro;35,000 per event, per market</li>
               <li>Events and markets to be selected by NetBet</li>
               <li>All broadcast display limited to feeds distributed solely within the Territory</li>
             </ul>
@@ -734,6 +751,7 @@ COMMERCIALS_MODAL = """
     </div>
   </div>
 </div>
+<!-- COMMERCIALS_MODAL_END -->
 """
 
 
@@ -884,6 +902,12 @@ def build_html():
              '<div class="content-visual walkout-visual">\n    '
              '<img src="assets/images/polymarket_prediction_walkouts.jpg"',
              "slide 9 visual panel tagged walkout-visual")
+
+    # --- 5h3. Slide 3 title accent --------------------------------------
+    h = sub1(h, r'<h2 class="slide-title">Always-on<br>brand presence</h2>',
+             '<h2 class="slide-title">Always-on<br>'
+             '<span class="ls-accent">brand presence</span></h2>',
+             "slide 3 title second line accented")
 
     # --- 5i. Colour-word copy ------------------------------------------
     h = sub1(h, r'synchronised sea of Polymarket blue',
@@ -1059,6 +1083,97 @@ def build_css():
     # --- 6e. Commercials nav button + placeholder ------------------------
     c += """
 
+/* === Commercials modal edit tools (only with ?edit in the URL) ===
+   Hidden by default so the partner-facing deck is visually unchanged. */
+.terms-modal-edit {
+    display: none;
+}
+body.terms-edit-available .terms-modal-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+    font-family: var(--font-cond);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+/* The two extra buttons leave no room for the lockup, so it steps aside in
+   edit mode. Edit mode is a working view; the partner-facing one keeps it. */
+body.terms-edit-available .terms-modal-lockup {
+    display: none;
+}
+body.terms-edit-available .terms-modal-edit:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+}
+body.terms-edit-available .terms-modal-edit.is-active {
+    background: var(--ls-green);
+    border-color: var(--ls-green);
+    color: #fff;
+}
+/* Editing affordance: a dashed frame inside the body, plus a soft tint on the
+   block under the caret. Deliberately subtle so line breaks don't shift. */
+.terms-modal.is-editing .terms-modal-body {
+    outline: 1px dashed rgba(255, 255, 255, 0.18);
+    outline-offset: -8px;
+}
+.terms-modal.is-editing .terms-modal-body:focus {
+    outline-color: var(--ls-green-bright);
+}
+.terms-modal.is-editing .terms-modal-body li:hover,
+.terms-modal.is-editing .terms-modal-body dd:hover {
+    background: rgba(255, 255, 255, 0.035);
+    border-radius: 3px;
+}
+@media print {
+    .terms-modal-edit { display: none !important; }
+    .terms-modal.is-editing .terms-modal-body { outline: none; }
+}
+
+/* === Commercials modal header lockup (PFL × NetBet) === */
+.terms-modal-lockup {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    padding-right: 20px;
+    margin-right: 4px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+.terms-modal-lockup img {
+    width: auto;
+    display: block;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+}
+/* Matches the topbar's optical balance: the PFL mark carries a crown, so it
+   needs marginally more height than the NetBet wordmark to read level. */
+.terms-modal-lockup img:first-of-type { height: 30px; }
+.terms-modal-lockup img:last-of-type { height: 29px; }
+.terms-modal-lockup-x {
+    width: 1px;
+    height: 22px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.28) 30%, rgba(255,255,255,0.28) 70%, transparent 100%);
+}
+@media (max-width: 900px) {
+    .terms-modal-lockup {
+        display: none;
+    }
+}
+/* The lockup is decorative on screen; the print header carries it on paper. */
+@media print {
+    .terms-modal-lockup { display: none; }
+}
+
 /* Height shares for the stacked social-series pair (see .ig-series-pair). */
 .ig-series-pair img:nth-of-type(1) { max-height: calc((100% - 16px) * 0.438); }
 .ig-series-pair img:nth-of-type(2) { max-height: calc((100% - 16px) * 0.562); }
@@ -1104,6 +1219,114 @@ def build_css():
 # 7. JS
 # ---------------------------------------------------------------------------
 
+EDIT_JS = r"""
+
+/* ===================================================================
+   Commercials modal — in-place editing (opt-in)
+   -------------------------------------------------------------------
+   Edit tools appear ONLY when the deck is opened with "?edit" in the
+   URL, so the partner-facing link is untouched. Edits live in the
+   browser and are NOT saved anywhere: "Export" writes an updated
+   index.html for committing to GitHub. Reloading without exporting
+   discards changes.
+   =================================================================== */
+(function setupCommercialsEditing() {
+  const modal = document.getElementById('commercialsModal');
+  if (!modal) return;
+  const body = modal.querySelector('.terms-modal-body');
+  const editBtn = modal.querySelector('[data-terms-edit]');
+  const exportBtn = modal.querySelector('[data-terms-export]');
+  if (!body || !editBtn || !exportBtn) return;
+
+  if (!new URLSearchParams(window.location.search).has('edit')) return;
+  document.body.classList.add('terms-edit-available');
+
+  const START = '<!-- COMMERCIALS_MODAL_START -->';
+  const END = '<!-- COMMERCIALS_MODAL_END -->';
+  let editing = false;
+  let dirty = false;
+
+  function setEditing(on) {
+    editing = on;
+    body.setAttribute('contenteditable', on ? 'true' : 'false');
+    body.spellcheck = on;
+    modal.classList.toggle('is-editing', on);
+    editBtn.classList.toggle('is-active', on);
+    editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    editBtn.querySelector('span').textContent = on ? 'Editing' : 'Edit';
+    if (on) body.focus();
+  }
+  setEditing(false);
+
+  editBtn.addEventListener('click', () => setEditing(!editing));
+  body.addEventListener('input', () => { dirty = true; });
+
+  // Keep pasted text plain so pasting from Word/Docs can't drag in foreign
+  // fonts, colours or spans and break the deck's formatting.
+  body.addEventListener('paste', (e) => {
+    if (!editing) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, text);
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  function cleanedModalHTML() {
+    const clone = modal.cloneNode(true);
+    clone.classList.remove('is-open', 'is-editing');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('[contenteditable]').forEach(el => {
+      el.removeAttribute('contenteditable');
+      el.removeAttribute('spellcheck');
+    });
+    const eb = clone.querySelector('[data-terms-edit]');
+    if (eb) {
+      eb.classList.remove('is-active');
+      eb.setAttribute('aria-pressed', 'false');
+      const s = eb.querySelector('span');
+      if (s) s.textContent = 'Edit';
+    }
+    return clone.outerHTML;
+  }
+
+  function download(name, text) {
+    const blob = new Blob([text], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  exportBtn.addEventListener('click', async () => {
+    const fresh = cleanedModalHTML();
+    try {
+      const res = await fetch(window.location.pathname, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const src = await res.text();
+      const i = src.indexOf(START);
+      const j = src.indexOf(END);
+      if (i === -1 || j === -1) throw new Error('markers missing');
+      download('index.html',
+        src.slice(0, i + START.length) + '\n' + fresh + '\n' + src.slice(j));
+      dirty = false;
+    } catch (err) {
+      // Opening the file directly from disk blocks reading the page source,
+      // so hand back just the modal block to paste between the two markers.
+      download('commercials-modal.html', START + '\n' + fresh + '\n' + END);
+      dirty = false;
+    }
+  });
+})();
+"""
+
+
 def build_js():
     p = OUT / "js" / "deck.js"
     j = p.read_text()
@@ -1141,6 +1364,9 @@ def build_js():
     j = subN(j, r'Polymarket', 'NetBet', "js content-string brand names")
     check("polymarket" not in j.lower(), "zero polymarket references in JS")
     check("TOTAL_LOGICAL = 18" in j, "TOTAL_LOGICAL updated to 18")
+
+    j = j.rstrip() + "\n" + EDIT_JS.lstrip("\n")
+    check("setupCommercialsEditing" in j, "commercials editing module appended")
 
     p.write_text(j)
     print("  deck.js rebuilt")

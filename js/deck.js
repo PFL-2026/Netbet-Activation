@@ -674,3 +674,106 @@
     }
   }, true); // capture phase — fires before deck arrow-key handler
 })();
+/* ===================================================================
+   Commercials modal — in-place editing (opt-in)
+   -------------------------------------------------------------------
+   Edit tools appear ONLY when the deck is opened with "?edit" in the
+   URL, so the partner-facing link is untouched. Edits live in the
+   browser and are NOT saved anywhere: "Export" writes an updated
+   index.html for committing to GitHub. Reloading without exporting
+   discards changes.
+   =================================================================== */
+(function setupCommercialsEditing() {
+  const modal = document.getElementById('commercialsModal');
+  if (!modal) return;
+  const body = modal.querySelector('.terms-modal-body');
+  const editBtn = modal.querySelector('[data-terms-edit]');
+  const exportBtn = modal.querySelector('[data-terms-export]');
+  if (!body || !editBtn || !exportBtn) return;
+
+  if (!new URLSearchParams(window.location.search).has('edit')) return;
+  document.body.classList.add('terms-edit-available');
+
+  const START = '<!-- COMMERCIALS_MODAL_START -->';
+  const END = '<!-- COMMERCIALS_MODAL_END -->';
+  let editing = false;
+  let dirty = false;
+
+  function setEditing(on) {
+    editing = on;
+    body.setAttribute('contenteditable', on ? 'true' : 'false');
+    body.spellcheck = on;
+    modal.classList.toggle('is-editing', on);
+    editBtn.classList.toggle('is-active', on);
+    editBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    editBtn.querySelector('span').textContent = on ? 'Editing' : 'Edit';
+    if (on) body.focus();
+  }
+  setEditing(false);
+
+  editBtn.addEventListener('click', () => setEditing(!editing));
+  body.addEventListener('input', () => { dirty = true; });
+
+  // Keep pasted text plain so pasting from Word/Docs can't drag in foreign
+  // fonts, colours or spans and break the deck's formatting.
+  body.addEventListener('paste', (e) => {
+    if (!editing) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    document.execCommand('insertText', false, text);
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  function cleanedModalHTML() {
+    const clone = modal.cloneNode(true);
+    clone.classList.remove('is-open', 'is-editing');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('[contenteditable]').forEach(el => {
+      el.removeAttribute('contenteditable');
+      el.removeAttribute('spellcheck');
+    });
+    const eb = clone.querySelector('[data-terms-edit]');
+    if (eb) {
+      eb.classList.remove('is-active');
+      eb.setAttribute('aria-pressed', 'false');
+      const s = eb.querySelector('span');
+      if (s) s.textContent = 'Edit';
+    }
+    return clone.outerHTML;
+  }
+
+  function download(name, text) {
+    const blob = new Blob([text], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  exportBtn.addEventListener('click', async () => {
+    const fresh = cleanedModalHTML();
+    try {
+      const res = await fetch(window.location.pathname, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const src = await res.text();
+      const i = src.indexOf(START);
+      const j = src.indexOf(END);
+      if (i === -1 || j === -1) throw new Error('markers missing');
+      download('index.html',
+        src.slice(0, i + START.length) + '\n' + fresh + '\n' + src.slice(j));
+      dirty = false;
+    } catch (err) {
+      // Opening the file directly from disk blocks reading the page source,
+      // so hand back just the modal block to paste between the two markers.
+      download('commercials-modal.html', START + '\n' + fresh + '\n' + END);
+      dirty = false;
+    }
+  });
+})();

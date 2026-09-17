@@ -805,6 +805,7 @@
 </div>
 
 <!-- Commercials Modal — opens from the top nav. Source: NetBet_Terms_Sheet_26-27.pptx -->
+<!-- COMMERCIALS_MODAL_START -->
 <div class="dist-modal terms-modal" id="commercialsModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="commercialsTitle">
   <div class="terms-modal-backdrop" data-close-dist-modal></div>
   <div class="terms-modal-shell">
@@ -819,6 +820,14 @@
         <h2 id="commercialsTitle" class="terms-modal-title">Commercial <span class="ls-accent">Terms</span></h2>
       </div>
       <div class="terms-modal-actions">
+        <button type="button" class="terms-modal-edit" data-terms-edit aria-label="Toggle editing" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <span>Edit</span>
+        </button>
+        <button type="button" class="terms-modal-edit" data-terms-export aria-label="Export updated HTML">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h10l6 6v10a0 0 0 0 1 0 0H4Z"/><path d="M14 4v6h6M9 14h6M9 17h6"/></svg>
+          <span>Export</span>
+        </button>
         <button type="button" class="terms-modal-print" data-print-dist aria-label="Download as PDF">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           <span>Download PDF</span>
@@ -862,7 +871,7 @@
           <dd>
             <ul>
               <li><strong>2026:</strong> &euro;125,000</li>
-              <li><strong>2027:</strong> &euro;150,000</li>
+              <li><strong>2027:</strong> &euro;250,000</li>
               <li>Virtual overlay branding at out-of-Territory events: &euro;35,000 per event, per market</li>
               <li>Athlete ambassadors: costed as an additional line item (see <em>Athlete Ambassador Program</em>, asset 10)</li>
             </ul>
@@ -1042,6 +1051,7 @@
     </div>
   </div>
 </div>
+<!-- COMMERCIALS_MODAL_END -->
 
 <script src="js/deck.js?v=20260818-netbet1"></script>
 </body>

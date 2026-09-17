@@ -4664,6 +4664,61 @@ body.terms-modal-open { overflow: hidden; }
 }
 
 
+/* === Commercials modal edit tools (only with ?edit in the URL) ===
+   Hidden by default so the partner-facing deck is visually unchanged. */
+.terms-modal-edit {
+    display: none;
+}
+body.terms-edit-available .terms-modal-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.72);
+    font-family: var(--font-cond);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+/* The two extra buttons leave no room for the lockup, so it steps aside in
+   edit mode. Edit mode is a working view; the partner-facing one keeps it. */
+body.terms-edit-available .terms-modal-lockup {
+    display: none;
+}
+body.terms-edit-available .terms-modal-edit:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
+}
+body.terms-edit-available .terms-modal-edit.is-active {
+    background: var(--ls-green);
+    border-color: var(--ls-green);
+    color: #fff;
+}
+/* Editing affordance: a dashed frame inside the body, plus a soft tint on the
+   block under the caret. Deliberately subtle so line breaks don't shift. */
+.terms-modal.is-editing .terms-modal-body {
+    outline: 1px dashed rgba(255, 255, 255, 0.18);
+    outline-offset: -8px;
+}
+.terms-modal.is-editing .terms-modal-body:focus {
+    outline-color: var(--ls-green-bright);
+}
+.terms-modal.is-editing .terms-modal-body li:hover,
+.terms-modal.is-editing .terms-modal-body dd:hover {
+    background: rgba(255, 255, 255, 0.035);
+    border-radius: 3px;
+}
+@media print {
+    .terms-modal-edit { display: none !important; }
+    .terms-modal.is-editing .terms-modal-body { outline: none; }
+}
+
 /* === Commercials modal header lockup (PFL × NetBet) === */
 .terms-modal-lockup {
     display: flex;
